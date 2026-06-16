@@ -926,6 +926,7 @@ fun WorkshopView(
                     val activeModelObj = appModels.find { it.model == selectedModel }
                     val activeLabel = activeModelObj?.name ?: selectedModel
                     val activeDesc = activeModelObj?.desc ?: "高性能生成式视频模型"
+                    val activeImageUrl = activeModelObj?.image
 
                     Row(
                         modifier = Modifier
@@ -945,12 +946,21 @@ fun WorkshopView(
                                 .background(SleekSecondary),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Layers,
-                                contentDescription = null,
-                                tint = SleekPrimary,
-                                modifier = Modifier.size(18.dp)
-                            )
+                            if (!activeImageUrl.isNullOrEmpty()) {
+                                AsyncImage(
+                                    model = activeImageUrl,
+                                    contentDescription = null,
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.Layers,
+                                    contentDescription = null,
+                                    tint = SleekPrimary,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
                         }
 
                         Spacer(modifier = Modifier.width(12.dp))
@@ -963,12 +973,6 @@ fun WorkshopView(
                                 color = SleekText,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = activeDesc,
-                                color = Color(0xFF49454F).copy(alpha = 0.8f),
-                                fontSize = 11.sp
                             )
                         }
 
@@ -1024,6 +1028,18 @@ fun WorkshopView(
                                                 modifier = Modifier.fillMaxWidth()
                                             ) {
                                                 Row(verticalAlignment = Alignment.CenterVertically) {
+                                                    if (!appModel.image.isNullOrEmpty()) {
+                                                        AsyncImage(
+                                                            model = appModel.image,
+                                                            contentDescription = null,
+                                                            modifier = Modifier
+                                                                .size(20.dp)
+                                                                .clip(CircleShape)
+                                                                .border(BorderStroke(0.5.dp, SleekBorder), CircleShape),
+                                                            contentScale = ContentScale.Crop
+                                                        )
+                                                        Spacer(modifier = Modifier.width(8.dp))
+                                                    }
                                                     Text(
                                                         text = appModel.name,
                                                         color = if (active) SleekPrimary else SleekText,
@@ -1063,15 +1079,6 @@ fun WorkshopView(
                                                         )
                                                     }
                                                 }
-                                            }
-                                            val modelDesc = appModel.desc ?: ""
-                                            if (modelDesc.isNotEmpty()) {
-                                                Spacer(modifier = Modifier.height(2.dp))
-                                                Text(
-                                                    text = modelDesc,
-                                                    color = Color(0xFF49454F).copy(alpha = 0.7f),
-                                                    fontSize = 11.sp
-                                                )
                                             }
                                         }
                                     },

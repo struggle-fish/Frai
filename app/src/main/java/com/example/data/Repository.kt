@@ -122,9 +122,31 @@ class VideoRepository(
         videoTaskDao.clearAllTasks()
     }
 
-    suspend fun fetchAppModels(baseUrl: String): com.example.data.api.ModelResponse? {
+    suspend fun fetchAppModels(baseUrl: String): List<com.example.data.api.AppModel>? {
         return try {
-            com.example.data.api.ApiService.create(baseUrl).getAppModelDetailsList()
+            val service = com.example.data.api.ApiService.create(baseUrl)
+            val catResponse = service.getAppModelList(System.currentTimeMillis())
+            if (catResponse.code == 200) {
+                val parents = catResponse.data ?: emptyList()
+                val allChildren = mutableListOf<com.example.data.api.AppModel>()
+                parents.forEach { parent ->
+                    try {
+                        val detailsResponse = service.getAppModelDetailsList(id = parent.id)
+                        if (detailsResponse.code == 200) {
+                            val childList = detailsResponse.data?.childList
+                            if (childList != null) {
+                                allChildren.addAll(childList)
+                            }
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+                allChildren.filter { it.outputType == 2 }
+                    .sortedByDescending { it.isHot == 1 }
+            } else {
+                null
+            }
         } catch (e: Exception) {
             e.printStackTrace()
             null

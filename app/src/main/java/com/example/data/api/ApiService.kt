@@ -41,10 +41,26 @@ data class AppModel(
     @Json(name = "output_type") val outputType: Int?
 )
 
+@JsonClass(generateAdapter = true)
+data class CategoryResponse(
+    @Json(name = "code") val code: Int,
+    @Json(name = "msg") val msg: String,
+    @Json(name = "data") val data: List<AppModel>?
+)
+
 interface ApiService {
 
+    @GET("api/index/getAppModelList")
+    suspend fun getAppModelList(
+        @retrofit2.http.Query("_t") timestamp: Long? = null
+    ): CategoryResponse
+
     @GET("api/index/getAppModelDetailsList")
-    suspend fun getAppModelDetailsList(): ModelResponse
+    suspend fun getAppModelDetailsList(
+        @retrofit2.http.Query("id") id: Int? = 1,
+        @retrofit2.http.Query("parent_id") parentId: Int? = null,
+        @retrofit2.http.Query("type") type: String? = null
+    ): ModelResponse
 
     companion object {
         fun create(baseUrl: String): ApiService {

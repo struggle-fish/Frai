@@ -92,9 +92,8 @@ class VideoViewModel(
             _isLoadingModels.value = true
             try {
                 val baseUrl = if (_currentEnv.value == "Online") "https://api-a.frai.live" else "https://api.tacpay.cn"
-                val response = repository.fetchAppModels(baseUrl)
-                if (response != null && response.code == 200) {
-                    val list = response.data?.childList ?: emptyList()
+                val list = repository.fetchAppModels(baseUrl)
+                if (list != null) {
                     _appModels.value = list
                     if (list.isNotEmpty()) {
                         // If selected model is not in the list, set to the first model
