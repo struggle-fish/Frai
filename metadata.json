@@ -1,0 +1,8 @@
+{
+  "name": "Remix: VidKraft AI",
+  "description": "Multi-model AI video generator powered by Wan, Kling, and Minimax. Features creative prompting, lucky draw rewards, and complete subscription billing management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

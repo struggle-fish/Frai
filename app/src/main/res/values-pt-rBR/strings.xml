@@ -1,0 +1,94 @@
+<resources>
+    <string name="app_name">VidKraft AI</string>
+    <string name="action_generate">Gerar Vídeo</string>
+    <string name="action_report_abuse">Denunciar Conteúdo</string>
+    <string name="action_delete_account">Excluir Conta</string>
+    <string name="title_creative_module">Oficina</string>
+    <string name="title_task_system">Sorteio Diário</string>
+    <string name="title_billing">Assinatura</string>
+    <string name="title_history">Histórico</string>
+
+    <!-- Creative Workshop -->
+    <string name="one_stop_title">Criação de Vídeo Inteligente Tudo-em-Um</string>
+    <string name="one_stop_desc">Alterne livremente entre os melhores modelos de IA, digite seus comandos e renderize em segundos.</string>
+    <string name="step1_title">Passo 1: Selecionar Modelo de Renderização</string>
+    <string name="step2_title">Passo 2: Enviar Imagem de Referência do Primeiro Quadro (Opcional)</string>
+    <string name="remove_image">Remover Imagem</string>
+    <string name="upload_progress">Enviando e extraindo características...</string>
+    <string name="upload_ready">Características do primeiro quadro carregadas com sucesso</string>
+    <string name="upload_placeholder_title">Selecione uma imagem local para enviar e extrair informações do assunto</string>
+    <string name="upload_placeholder_desc">Suporta formatos WebP / PNG / JPG</string>
+    <string name="step3_title">Passo 3: Comando e Descrição da Ação de Câmera com IA</string>
+    <string name="prompt_placeholder">Ex: Um lindo Qilin correndo sob um céu estrelado deslumbrante, poeira estrela caindo como uma cachoeira, iluminação cinematográfica...</string>
+    <string name="suggestion_1">Cidade Cyberpunk 3D</string>
+    <string name="suggestion_2">Corrida de Qilin Cinemática</string>
+    <string name="suggestion_3">Chuva em Macro</string>
+    <string name="start_generation">Iniciar Geração Mágica de Vídeo</string>
+    <string name="cost_credits">Custa %1$d Créditos</string>
+
+    <!-- Lottery Daily System -->
+    <string name="draw_title">Giro da Sorte Computacional</string>
+    <string name="draw_desc">100% de Chance de Ganhar! Aproveite 1 giro gratuito diário para ganhar bônus de créditos e pacotes com super descontos.</string>
+    <string name="game_card_label">Carta de Energia %1$s</string>
+    <string name="draw_chance_exhausted_title">Chances de sorteio esgotadas hoje</string>
+    <string name="draw_chance_exhausted_desc">O sistema está redefinindo as cartas em segundo plano do carregador frio. Nova rodada amanhã às 10:00 AM!</string>
+    <string name="draw_guide_tip">Toque em qualquer carta acima para revelar os prêmios exclusivos</string>
+    <string name="reward_dialog_title">Decodificação do Pool de Energia!</string>
+    <string name="reward_congrats">Parabéns!</string>
+    <string name="reward_special_card">Carta Promocional</string>
+    <string name="reward_credit_desc_free">Jackpot de Teste! Você ganhou 15 créditos grátis, creditados automaticamente em sua conta! Nenhum pagamento é necessário.</string>
+    <string name="reward_credit_desc_paid">Esta carta premium de poder computacional custa apenas taxas mínimas para aumentar instantaneamente os renderizadores de vídeo. Processamento seguro do Google Play Billing.</string>
+    <string name="give_up">Desistir</string>
+    <string name="double_claim_text">Resgatar por R$ 4,90</string>
+
+    <!-- History View Library -->
+    <string name="history_title">Histórico Rápido de Render</string>
+    <string name="history_desc">Todos os resultados de áudio e vídeo gerados são sincronizados localmente e na nuvem em tempo real.</string>
+    <string name="clear_history">Limpar Histórico</string>
+    <string name="history_empty_title">O Histórico está Vazio</string>
+    <string name="history_empty_desc">Insira suas ideias na guia \"Oficina\" e gere seu primeiro vídeo de IA!</string>
+    <string name="status_success">Sucesso</string>
+    <string name="status_failed">Falhou</string>
+    <string name="status_uploading">Enviando Quadro</string>
+    <string name="status_processing">Renderizando na GPU</string>
+    <string name="status_queued">Na Fila</string>
+    <string name="security_blocked_title">Geração bloqueada por moderação de segurança ou falhas técnicas</string>
+    <string name="security_blocked_desc">Por favor, ajuste suas ideias ou evite termos sensíveis e tente rodar novamente.</string>
+    <string name="progress_uploading">Compactando e enviando quadro de referência de forma segura...</string>
+    <string name="progress_rendering">Calculando detalhes cinematográficos de câmera em paralelo...</string>
+
+    <!-- Billing Info Dialog -->
+    <string name="billing_dialog_title">Faturamento VidKraft e Combos Premium</string>
+    <string name="billing_dialog_desc">Integrado ao Google Play Billing 7.0. Todas as transações são criptografadas e validadas por gateways seguros.</string>
+    <string name="tier1_title">Pacote de Experiência Básica (25 Créditos)</string>
+    <string name="tier1_price">R$ 4,90 ($0.99)</string>
+    <string name="tier1_desc">Recarga suplementar imediata para criar até 5 vídeos profissionais</string>
+    <string name="tier2_title">Super Pacote do Criador (150 Créditos)</string>
+    <string name="tier2_price">R$ 19,90 ($3.99)</string>
+    <string name="tier2_desc">Renderização prioritária, melhor valor para usufruir de filas ultrarrápidas de GPU</string>
+    <string name="tier3_title">Geração Ilimitada PRO (Mensal)</string>
+    <string name="tier3_price">R$ 79,90 / mês</string>
+    <string name="tier3_desc">Vídeos ilimitados + aceleração dedicada de GPUs exclusivas (Minimax v2/Kling 1.5 Pro)</string>
+    <string name="buy_pro_desc">Inscrever-se na Versão PRO (30 Dias Ilimitados)</string>
+    <string name="buy_secure">Compra Segura</string>
+    <string name="dialog_close">Fechar</string>
+
+    <!-- Abuse Report Dialogue -->
+    <string name="report_dialog_title">Feedback de Moderação de Conteúdo</string>
+    <string name="report_dialog_desc">Exigimos conformidade rígida de segurança. Flagrantes serão banidos e todos os créditos serão revogados em 24 horas:</string>
+    <string name="report_reason_1">Conduta ilegal, perigosa ou prejudicial</string>
+    <string name="report_reason_2">Uso não autorizado de imagem de terceiros ou direitos autorais</string>
+    <string name="report_reason_3">Violento, explícito, assédio ou sugestivo para adultos</string>
+    <string name="report_reason_4">Falha de renderização técnica, qualidade muito baixa ou ruído</string>
+    <string name="report_extra_label">Detalhes adicionais (Opcional)</string>
+    <string name="report_submit">Enviar Denúncia</string>
+    <string name="report_cancel">Cancelar</string>
+    <string name="report_success_title">Denúncia Enviada com Sucesso</string>
+    <string name="report_success_desc">O conteúdo foi travado e marcado para análise. Os moderadores analisarão os detalhes em breve. Obrigado!</string>
+
+    <!-- Video Player -->
+    <string name="video_load_failed">Falha ao carregar o vídeo</string>
+    <string name="desc_report_abuse">Denunciar conteúdo</string>
+    <string name="desc_play_pause">Reproduzir ou pausar</string>
+    <string name="desc_mute_toggle">Alternar mudo</string>
+</resources>

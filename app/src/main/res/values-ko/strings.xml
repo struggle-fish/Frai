@@ -1,0 +1,94 @@
+<resources>
+    <string name="app_name">VidKraft AI</string>
+    <string name="action_generate">동영상 생성</string>
+    <string name="action_report_abuse">콘텐츠 신고</string>
+    <string name="action_delete_account">계정 삭제</string>
+    <string name="title_creative_module">워크숍</string>
+    <string name="title_task_system">일일 가챠</string>
+    <string name="title_billing">멤버십</string>
+    <string name="title_history">기록</string>
+
+    <!-- Creative Workshop -->
+    <string name="one_stop_title">원스톱 AI 동영상 제작</string>
+    <string name="one_stop_desc">업계 최고의 AI 비디오 생성 모델들을 자유롭게 전환하고 지시어를 입력해 순식간에 렌더링하세요.</string>
+    <string name="step1_title">1단계: 렌더링 모델 선택</string>
+    <string name="step2_title">2단계: 첫 프레임 참조 이미지 업로드 (선택)</string>
+    <string name="remove_image">이미지 제거</string>
+    <string name="upload_progress">업로드 및 특징 추출 중...</string>
+    <string name="upload_ready">첫 프레임 특징을 성공적으로 로드했습니다</string>
+    <string name="upload_placeholder_title">로컬 이미지를 업로드해 이미지 오브젝트 정보를 스마트하게 추출</string>
+    <string name="upload_placeholder_desc">WebP / PNG / JPG 형식 지원</string>
+    <string name="step3_title">3단계: AI 카메라 액션 설명 및 명령</string>
+    <string name="prompt_placeholder">예시: 찬란한 밤하늘 아래를 질주하는 아름다운 기린, 폭포처럼 쏟아지는 별빛, 시네마틱 조명...</string>
+    <string name="suggestion_1">사이버펑크 시티 3D</string>
+    <string name="suggestion_2">기린 별추적 시네마틱</string>
+    <string name="suggestion_3">매크로 빗방울</string>
+    <string name="start_generation">마법 비디오 상상 생성 시작</string>
+    <string name="cost_credits">%1$d 크레딧 차감</string>
+
+    <!-- Lottery Daily System -->
+    <string name="draw_title">럭키 컴퓨팅 가챠</string>
+    <string name="draw_desc">100% 당첨 보장! 하루에 한 번 카드를 뒤집어 무료 크레딧과 할인 팩 찬스를 잡으세요.</string>
+    <string name="game_card_label">에너지 카드 %1$s</string>
+    <string name="draw_chance_exhausted_title">오늘의 무료 가챠 기회를 모두 사용했습니다</string>
+    <string name="draw_chance_exhausted_desc">카드 풀이 재로딩 중입니다. 내일 오전 10:00에 새 가챠 판이 열립니다!</string>
+    <string name="draw_guide_tip">위 카드 중 하나를 선택해 특별 크리에이터 혜택을 여세요</string>
+    <string name="reward_dialog_title">에너지 카드 분석 완료!</string>
+    <string name="reward_congrats">축하합니다!</string>
+    <string name="reward_special_card">특전 카드</string>
+    <string name="reward_credit_desc_free">잭팟! 15 무료 크레딧을 획득하셨습니다. 계정에 자동으로 가산되었습니다! 결제할 필요가 없습니다.</string>
+    <string name="reward_credit_desc_paid">본 우대 혜택은 아주 저렴한 가격에 초고속 대량 비디오 렌더링 횟수를 즉시 추가해 드립니다. Google Play 결제 시스템 안전 지불.</string>
+    <string name="give_up">아쉽지만 포기</string>
+    <string name="double_claim_text">₩1,500 지금 즉시 수령</string>
+
+    <!-- History View Library -->
+    <string name="history_title">신속 렌더링 기록</string>
+    <string name="history_desc">생성된 모든 미디어 결과물들은 로컬 샌드박스 및 클라우드 데이터베이스에 동기화 유지됩니다.</string>
+    <string name="clear_history">기록 비우기</string>
+    <string name="history_empty_title">기록이 비어있습니다</string>
+    <string name="history_empty_desc">「워크숍」 탭에서 영감 단어들을 입력해 나만의 첫 AI 비디오를 완성해 보세요!</string>
+    <string name="status_success">성공</string>
+    <string name="status_failed">실패</string>
+    <string name="status_uploading">업로드 중</string>
+    <string name="status_processing">GPU 생성 연산 중</string>
+    <string name="status_queued">대기열 처리 중</string>
+    <string name="security_blocked_title">보안 규정 또는 기술적 오류로 인해 생성이 차단되었습니다</string>
+    <string name="security_blocked_desc">입력하신 아이디어를 수정하고, 제한 키워드를 우회하여 다시 마법 영상 생성을 시작해 보세요.</string>
+    <string name="progress_uploading">참조 프레임을 안전하게 압축 및 서버로 전송 중...</string>
+    <string name="progress_rendering">속도감 있는 화면 연출을 위해 고성능 GPU 병렬 계산 중...</string>
+
+    <!-- Billing Info Dialog -->
+    <string name="billing_dialog_title">VidKraft 결제 및 프리미엄 특별 혜택</string>
+    <string name="billing_dialog_desc">본 앱은 Google Play Billing 7.0 지불 시스템을 지원합니다. 모든 트랜잭션은 암호화 보안 검증을 거칩니다.</string>
+    <string name="tier1_title">기본 체험용 크레딧 팩 (25 크레딧)</string>
+    <string name="tier1_price">₩1,200 ($0.99)</string>
+    <string name="tier1_desc">즉시 보충, 최고 품질의 비디오를 최대 5회 생성 가능</string>
+    <string name="tier2_title">프리미엄 크리에이터 대용량 팩 (150 크레딧)</string>
+    <string name="tier2_price">₩4,800 ($3.99)</string>
+    <string name="tier2_desc">초고속 우선순위 GPU 렌더링 대기열 특전 탑재, 압도적인 가성비</string>
+    <string name="tier3_title">무제한 비디오 생성 PRO 멤버십 (월간 정기 구독)</string>
+    <string name="tier3_price">₩19,000 / 월</string>
+    <string name="tier3_desc">매월 생성 횟수 무제한 + 전용 고성능 모델 속도 향상 (Minimax v2/Kling 1.5 Pro)</string>
+    <string name="buy_pro_desc">PRO 버전 구독하기 (30일 무제한)</string>
+    <string name="buy_secure">안전하게 결제</string>
+    <string name="dialog_close">닫기</string>
+
+    <!-- Abuse Report Dialogue -->
+    <string name="report_dialog_title">콘텐츠 안전 보고 및 피드백</string>
+    <string name="report_dialog_desc">당사는 콘텐츠 위반 정책을 엄격히 집행합니다. 접수된 위반 건은 24시간 이내 검토 후 제재 조치됩니다:</string>
+    <string name="report_reason_1">불법, 위험 또는 유해한 행위 묘사</string>
+    <string name="report_reason_2">타인의 승인되지 않은 초상권, 저작권, 도용</string>
+    <string name="report_reason_3">폭력, 혐오, 괴롭힘 및 성적인 암시 요소 포함</string>
+    <string name="report_reason_4">기술적 오류, 심각한 저화질, 노이즈 왜곡 생성</string>
+    <string name="report_extra_label">추가 상세 피드백 작성 (선택사항)</string>
+    <string name="report_submit">신고서 제출</string>
+    <string name="report_cancel">취소</string>
+    <string name="report_success_title">신고서 제출 완료</string>
+    <string name="report_success_desc">해당 콘텐츠는 즉시 잠금 및 정밀 검토 대상으로 분류되었습니다. 관리자 판단에 따라 신속히 규제 조치됩니다. 감사합니다!</string>
+
+    <!-- Video Player -->
+    <string name="video_load_failed">동영상 로딩 실패</string>
+    <string name="desc_report_abuse">콘텐츠 신고</string>
+    <string name="desc_play_pause">재생 및 일시정지</string>
+    <string name="desc_mute_toggle">음소거 전환</string>
+</resources>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- Cinematic Video Playback Base Case -->
+    <path
+        android:fillColor="#00E5FF"
+        android:pathData="M38,34 h22 c4.4,0 8,3.6 8,8 v24 c0,4.4 -3.6,8 -8,8 h-22 c-4.4,0 -8,-3.6 -8,-8 v-24 c0,-4.4 3.6,-8 8,-8 z" />
+
+    <!-- Camera Lens Triangle Funnel -->
+    <path
+        android:fillColor="#D0BCFF"
+        android:pathData="M68,46 L82,38 v32 L68,62 z" />
+
+    <!-- Center Play Silhouette Inner Trim -->
+    <path
+        android:fillColor="#080C14"
+        android:pathData="M44,44 L56,54 L44,64 z" />
+
+    <!-- Floating Spark/Magic Stars (Minimax, Wan, Kling nodes) -->
+    <!-- Star 1 (Cyan Glitter) -->
+    <path
+        android:fillColor="#00E5FF"
+        android:pathData="M24,24 L26,20 L28,24 L32,26 L28,28 L26,32 L24,28 L20,26 z" />
+
+    <!-- Star 2 (Gold Deluxe Splendor) -->
+    <path
+        android:fillColor="#FFFFD7"
+        android:pathData="M80,72 L82,68 L84,72 L88,74 L84,76 L82,80 L80,76 L76,74 z" />
+
+    <!-- Star 3 (Purple Spark) -->
+    <path
+        android:fillColor="#B066FF"
+        android:pathData="M84,24 L86,21 L88,24 L91,26 L88,28 L86,31 L84,28 L81,26 z" />
+</vector>

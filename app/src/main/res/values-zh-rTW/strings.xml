@@ -1,0 +1,94 @@
+<resources>
+    <string name="app_name">VidKraft AI</string>
+    <string name="action_generate">生成影片</string>
+    <string name="action_report_abuse">檢舉內容</string>
+    <string name="action_delete_account">刪除帳號</string>
+    <string name="title_creative_module">工坊</string>
+    <string name="title_task_system">每日抽卡</string>
+    <string name="title_billing">會員</string>
+    <string name="title_history">歷史</string>
+
+    <!-- Creative Workshop -->
+    <string name="one_stop_title">一站式智能影片創作</string>
+    <string name="one_stop_desc">自由切換業內頂尖AI大模型組件，輸入指令，秒級極速渲染。</string>
+    <string name="step1_title">第一步：選擇渲染模型</string>
+    <string name="step2_title">第二步：上傳首幀參考圖 (選填)</string>
+    <string name="remove_image">移除圖片</string>
+    <string name="upload_progress">正在上傳加密並提取特徵...</string>
+    <string name="upload_ready">首幀特徵載入就緒</string>
+    <string name="upload_placeholder_title">選擇本地圖片上傳，智慧提取圖像主體資訊</string>
+    <string name="upload_placeholder_desc">支援 WebP / PNG / JPG 格式</string>
+    <string name="step3_title">第三步：AI 鏡頭動作描述與指令</string>
+    <string name="prompt_placeholder">例如：一隻精美的中國風瑞獸麒麟在絢麗夜空極速奔跑，星光如瀑布般洒落，吉卜力寫實風，電影級光影...</string>
+    <string name="suggestion_1">賽博畫科幻都市 3d</string>
+    <string name="suggestion_2">麒麟逐星跑 cinematic</string>
+    <string name="suggestion_3">動態微距落雨</string>
+    <string name="start_generation">開始影片魔法化生成</string>
+    <string name="cost_credits">消耗 %1$d 積分</string>
+
+    <!-- Lottery Daily System -->
+    <string name="draw_title">幸運算力翻牌機</string>
+    <string name="draw_desc">100%爆率！每日享有1次免費抽牌獲取高額積分特惠及全免禮袋機會。</string>
+    <string name="game_card_label">能量牌 %1$s</string>
+    <string name="draw_chance_exhausted_title">今日免費機會已耗盡</string>
+    <string name="draw_chance_exhausted_desc">牌池正在深度冷熱重載中，明天10:00將分發新一批福利牌！</string>
+    <string name="draw_guide_tip">點擊上方任意能量星盤，翻開尊享創客禮遇</string>
+    <string name="reward_dialog_title">能量牌池大解密！</string>
+    <string name="reward_congrats">恭喜抽取</string>
+    <string name="reward_special_card">特惠卡</string>
+    <string name="reward_credit_desc_free">幸運體驗爆金：您所得的 15 點體驗積分，系統已自主同步下發並合併至您的初始帳戶！無需額外付費</string>
+    <string name="reward_credit_desc_paid">本次抽中該算力能量卡僅需支付極小金額，即刻加算巨額生成次數。Google Billing 專屬計費連結驗證。</string>
+    <string name="give_up">殘忍放棄</string>
+    <string name="double_claim_text">¥9.90 立即翻倍兌換</string>
+
+    <!-- History View Library -->
+    <string name="history_title">渲染歷史快客</string>
+    <string name="history_desc">所有已生成的音視頻結果均在本地沙盒及雲端長期保持同步。</string>
+    <string name="clear_history">清空歷史</string>
+    <string name="history_empty_title">畫卷空空</string>
+    <string name="history_empty_desc">在「工坊」填入靈感詞，創造專屬於您的首支AI影片吧！</string>
+    <string name="status_success">成功</string>
+    <string name="status_failed">失敗</string>
+    <string name="status_uploading">首幀上傳中</string>
+    <string name="status_processing">算力生成中</string>
+    <string name="status_queued">排隊中</string>
+    <string name="security_blocked_title">生成遭到安全機制或技術中斷阻滯</string>
+    <string name="security_blocked_desc">建議調整您的指令及上傳的參考圖像，避免違規禁忌熱詞後重新發起魔法影片渲染。</string>
+    <string name="progress_uploading">正在向伺服器壓縮上傳幀參考圖...</string>
+    <string name="progress_rendering">大模型正在並行計算鏡頭動作渲染...</string>
+
+    <!-- Billing Info Dialog -->
+    <string name="billing_dialog_title">VidKraft 計費與增值大禮包</string>
+    <string name="billing_dialog_desc">本應用整合 Google Play Billing 7.0 支付結算框架。所有支付校驗通過雲端加密同步。</string>
+    <string name="tier1_title">初級體驗積分包 (25積分)</string>
+    <string name="tier1_price">¥6.00 ($0.99)</string>
+    <string name="tier1_desc">即刻補充，可生成5個專業影片</string>
+    <string name="tier2_title">豪華創作者大包 (150積分)</string>
+    <string name="tier2_price">¥28.00 ($3.99)</string>
+    <string name="tier2_desc">特惠充值，尊享高速生成通道</string>
+    <string name="tier3_title">無限生成專業尊享版 (按月訂閱)</string>
+    <string name="tier3_price">¥98.00 / 月</string>
+    <string name="tier3_desc">不限生成次數 + 專屬模型加速（Minimax v2/Kling 1.5 Pro）</string>
+    <string name="buy_pro_desc">訂閱專業版 (30天無限量)</string>
+    <string name="buy_secure">安全購買</string>
+    <string name="dialog_close">關閉</string>
+
+    <!-- Abuse Report Dialogue -->
+    <string name="report_dialog_title">舉報內容反饋</string>
+    <string name="report_dialog_desc">我們嚴格遵守內容安全治理規範，任何舉報內容一經核實將在24小時內封禁並回收積分懲罰其發布者：</string>
+    <string name="report_reason_1">涉嫌非法或有害內容</string>
+    <string name="report_reason_2">包含未經授權的他人肖像/版權</string>
+    <string name="report_reason_3">內容血腥、暴力或色情</string>
+    <string name="report_reason_4">技術生成錯誤/質量過低</string>
+    <string name="report_extra_label">補充說明（選填）</string>
+    <string name="report_submit">提交舉報</string>
+    <string name="report_cancel">取消</string>
+    <string name="report_success_title">舉報提交成功</string>
+    <string name="report_success_desc">該生成內容已被過濾及打標。後台系統將在審核封禁涉事內容。感謝您對安全社區的貢獻！</string>
+
+    <!-- Video Player -->
+    <string name="video_load_failed">影片載入失敗</string>
+    <string name="desc_report_abuse">檢舉內容</string>
+    <string name="desc_play_pause">播放暫停</string>
+    <string name="desc_mute_toggle">靜音切換</string>
+</resources>

@@ -1,0 +1,94 @@
+<resources>
+    <string name="app_name">VidKraft AI</string>
+    <string name="action_generate">Generate Video</string>
+    <string name="action_report_abuse">Report Content</string>
+    <string name="action_delete_account">Delete Account</string>
+    <string name="title_creative_module">Workshop</string>
+    <string name="title_task_system">Daily Draw</string>
+    <string name="title_billing">Membership</string>
+    <string name="title_history">History</string>
+
+    <!-- Creative Workshop -->
+    <string name="one_stop_title">One-stop Intelligent Video Creation</string>
+    <string name="one_stop_desc">Switch top AI models freely, enter prompts, and render in seconds.</string>
+    <string name="step1_title">Step 1: Select Rendering Model</string>
+    <string name="step2_title">Step 2: Upload First Frame Reference (Optional)</string>
+    <string name="remove_image">Remove Image</string>
+    <string name="upload_progress">Uploading and extracting features...</string>
+    <string name="upload_ready">First frame features loaded successfully</string>
+    <string name="upload_placeholder_title">Select local image to upload and extract subject info</string>
+    <string name="upload_placeholder_desc">Supports WebP / PNG / JPG formats</string>
+    <string name="step3_title">Step 3: AI Camera Action Description &amp; Command</string>
+    <string name="prompt_placeholder">E.g., A beautiful Qilin running under gorgeous starry skies, starlight falling like waterfalls, cinematic lighting...</string>
+    <string name="suggestion_1">Cyber City 3D</string>
+    <string name="suggestion_2">Qilin Chase Cinematic</string>
+    <string name="suggestion_3">Macro Rainfall</string>
+    <string name="start_generation">Start Magical Video Generation</string>
+    <string name="cost_credits">Cost %1$d Credits</string>
+
+    <!-- Lottery Daily System -->
+    <string name="draw_title">Lucky Compute Flip</string>
+    <string name="draw_desc">100% Win Rate! Enjoy 1 free daily flip to grab premium credits and high discount gift packages.</string>
+    <string name="game_card_label">Power Card %1$s</string>
+    <string name="draw_chance_exhausted_title">Draw chance exhausted today</string>
+    <string name="draw_chance_exhausted_desc">Cards are re-balancing under system cold-reloading, next round drops at 10:00 AM tomorrow!</string>
+    <string name="draw_guide_tip">Tap any energy card above to flip creator gifts</string>
+    <string name="reward_dialog_title">Energy Pool Decryption!</string>
+    <string name="reward_congrats">Congratulations!</string>
+    <string name="reward_special_card">Promo Card</string>
+    <string name="reward_credit_desc_free">Jackpot! You win 15 free trial credits, auto-credited and merged into your balance! No purchase required.</string>
+    <string name="reward_credit_desc_paid">This premium compute power card only requires a minimal rate to instantly boost massive video render amounts. Google Play Billing secure checkout.</string>
+    <string name="give_up">Cruelly Give Up</string>
+    <string name="double_claim_text">$0.99 Claim Now</string>
+
+    <!-- History View Library -->
+    <string name="history_title">Quick Render History</string>
+    <string name="history_desc">All generated audio and video items are synced in local sandbox and cloud storage.</string>
+    <string name="clear_history">Clear History</string>
+    <string name="history_empty_title">Canvas is Empty</string>
+    <string name="history_empty_desc">Enter inspiration terms in \"Workshop\" and render your first AI video!</string>
+    <string name="status_success">Success</string>
+    <string name="status_failed">Failed</string>
+    <string name="status_uploading">Uploading Frame</string>
+    <string name="status_processing">Rendering AI GPU</string>
+    <string name="status_queued">Queued in Pool</string>
+    <string name="security_blocked_title">Generation blocked by security moderation or technical issues</string>
+    <string name="security_blocked_desc">Please update your prompt values or reference frame subject avoiding forbidden keywords, then re-initiate.</string>
+    <string name="progress_uploading">Compressing and uploading reference frame securely...</string>
+    <string name="progress_rendering">Computing high-speed camera rendering details parallelly...</string>
+
+    <!-- Billing Info Dialog -->
+    <string name="billing_dialog_title">VidKraft Billing &amp; Premium Bundles</string>
+    <string name="billing_dialog_desc">Integrated with Google Play Billing 7.0 system. All transaction signatures are securely encrypted and verified via sandbox-gateways.</string>
+    <string name="tier1_title">Basic Trial Credits Pack (25 Credits)</string>
+    <string name="tier1_price">$0.99 (¥6.00)</string>
+    <string name="tier1_desc">Supplemental replenishment, generates up to 5 cinematic outputs</string>
+    <string name="tier2_title">Premium Creator Pack (150 Credits)</string>
+    <string name="tier2_price">$3.99 (¥28.00)</string>
+    <string name="tier2_desc">High-priority queue rendering with dedicated GPU acceleration, best-value</string>
+    <string name="tier3_title">Unlimited Render PRO Membership (Monthly)</string>
+    <string name="tier3_price">$14.99 / mo</string>
+    <string name="tier3_desc">Unlimited video generation + exclusive models boost (Minimax v2/Kling 1.5 Pro)</string>
+    <string name="buy_pro_desc">Subscribe PRO Version (30-day Unlimited)</string>
+    <string name="buy_secure">Secure Checkout</string>
+    <string name="dialog_close">Close</string>
+
+    <!-- Abuse Report Dialogue -->
+    <string name="report_dialog_title">Content Regulation Feedback</string>
+    <string name="report_dialog_desc">We strictly enforce local guidelines. Verified violations will ban the user and reclaim all credit allocations within 24 hours:</string>
+    <string name="report_reason_1">Illegal, dangerous or harmful conduct</string>
+    <string name="report_reason_2">Unauthorized portrait, trademark or copyright infringement</string>
+    <string name="report_reason_3">Violent, graphic, harassing or sexually suggestive contents</string>
+    <string name="report_reason_4">Technical compilation fail, low definition or noise glitches</string>
+    <string name="report_extra_label">Additional details (Optional)</string>
+    <string name="report_submit">Submit Report</string>
+    <string name="report_cancel">Cancel</string>
+    <string name="report_success_title">Report Submitted Successfully</string>
+    <string name="report_success_desc">The generated content has been locked and tagged. Verification desk moderators will review the submission. Thank you!</string>
+
+    <!-- Video Player -->
+    <string name="video_load_failed">Video loading failed</string>
+    <string name="desc_report_abuse">Report content</string>
+    <string name="desc_play_pause">Play or Pause</string>
+    <string name="desc_mute_toggle">Toggle Mute</string>
+</resources>
