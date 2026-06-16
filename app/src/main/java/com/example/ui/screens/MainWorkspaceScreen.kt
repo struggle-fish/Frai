@@ -2,6 +2,8 @@ package com.example.ui.screens
 
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
@@ -11,7 +13,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -61,7 +65,29 @@ fun MainWorkspaceScreen(
     val currentEnv by viewModel.currentEnv.collectAsStateWithLifecycle()
     val prompt by viewModel.prompt.collectAsStateWithLifecycle()
     val imageUrl by viewModel.imageUrl.collectAsStateWithLifecycle()
+    val imageUrls by viewModel.imageUrls.collectAsStateWithLifecycle()
     val isUploadingImage by viewModel.isUploadingImage.collectAsStateWithLifecycle()
+    val referenceVideoUrls by viewModel.referenceVideoUrls.collectAsStateWithLifecycle()
+    val referenceAudioUrls by viewModel.referenceAudioUrls.collectAsStateWithLifecycle()
+    val useSeedReferenceMode = viewModel.isFullFeaturedSeedanceModel(selectedModel)
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { viewModel.uploadImageFromUri(it) }
+    }
+
+    val videoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { viewModel.uploadReferenceVideoFromUri(it) }
+    }
+
+    val audioPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { viewModel.uploadReferenceAudioFromUri(it) }
+    }
 
     val isDrawing by viewModel.isDrawing.collectAsStateWithLifecycle()
     val drawResult by viewModel.drawResult.collectAsStateWithLifecycle()
@@ -488,9 +514,21 @@ fun MainWorkspaceScreen(
                                     prompt = prompt,
                                     onPromptChange = { viewModel.updatePrompt(it) },
                                     imageUrl = imageUrl,
+                                    imageUrls = imageUrls,
                                     isUploadingImage = isUploadingImage,
-                                    onUploadImage = { viewModel.simulateImageUpload() },
+                                    useSeedReferenceMode = useSeedReferenceMode,
+                                    referenceVideoUrls = referenceVideoUrls,
+                                    referenceAudioUrls = referenceAudioUrls,
+                                    onUploadImage = { imagePickerLauncher.launch("image/*") },
+                                    onUploadReferenceVideo = { videoPickerLauncher.launch("video/*") },
+                                    onUploadReferenceAudio = { audioPickerLauncher.launch("audio/*") },
                                     onRemoveImage = { viewModel.removeUploadedImage() },
+                                    onRemoveImageAt = { viewModel.removeImageAt(it) },
+                                    onAddImageUrl = { viewModel.addImageUrl(it) },
+                                    onAddReferenceVideoUrl = { viewModel.addReferenceVideoUrl(it) },
+                                    onRemoveReferenceVideoAt = { viewModel.removeReferenceVideoAt(it) },
+                                    onAddReferenceAudioUrl = { viewModel.addReferenceAudioUrl(it) },
+                                    onRemoveReferenceAudioAt = { viewModel.removeReferenceAudioAt(it) },
                                     onSubmit = { viewModel.startVideoGeneration() },
                                     appModels = appModels,
                                     currentEnv = currentEnv,
@@ -831,15 +869,135 @@ fun SleekHeaderSection(
 
 // Creative workshop tab view implementation
 @Composable
+private fun SeedReferenceMediaSection(
+    title: String,
+    hint: String,
+    urls: List<String>,
+    urlPlaceholder: String,
+    maxCount: Int,
+    onUpload: () -> Unit,
+    onAddUrl: (String) -> Unit,
+    onRemoveAt: (Int) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(title, color = SleekText, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+            Text("${urls.size}/$maxCount", color = SleekText.copy(alpha = 0.6f), fontSize = 11.sp)
+        }
+        Text(
+            hint,
+            color = Color(0xFF49454F).copy(alpha = 0.7f),
+            fontSize = 10.sp,
+            modifier = Modifier.padding(top = 2.dp, bottom = 8.dp)
+        )
+
+        urls.forEachIndexed { index, url ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 6.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(SleekSurfaceVariant)
+                    .border(BorderStroke(1.dp, SleekBorder), RoundedCornerShape(12.dp))
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = url,
+                    color = SleekText,
+                    fontSize = 11.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+                IconButton(onClick = { onRemoveAt(index) }, modifier = Modifier.size(28.dp)) {
+                    Icon(Icons.Default.Delete, contentDescription = "Remove", tint = SleekText.copy(alpha = 0.7f), modifier = Modifier.size(16.dp))
+                }
+            }
+        }
+
+        if (urls.size < maxCount) {
+            var inputText by remember { mutableStateOf("") }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                OutlinedTextField(
+                    value = inputText,
+                    onValueChange = { inputText = it },
+                    placeholder = { Text(urlPlaceholder, color = Color(0xFF49454F).copy(alpha = 0.4f), fontSize = 12.sp) },
+                    modifier = Modifier.weight(1f),
+                    singleLine = true,
+                    shape = RoundedCornerShape(8.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = SleekSurface,
+                        unfocusedContainerColor = SleekSurface,
+                        focusedBorderColor = SleekPrimary,
+                        unfocusedBorderColor = SleekBorder,
+                        focusedLabelColor = SleekPrimary
+                    ),
+                    textStyle = TextStyle(color = SleekText, fontSize = 12.sp)
+                )
+                IconButton(onClick = onUpload) {
+                    Icon(Icons.Default.FolderOpen, contentDescription = "Upload file", tint = SleekPrimary)
+                }
+                Button(
+                    onClick = {
+                        if (inputText.trim().isNotEmpty()) {
+                            onAddUrl(inputText)
+                            inputText = ""
+                        }
+                    },
+                    enabled = inputText.trim().isNotEmpty(),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = SleekSurfaceVariant,
+                        contentColor = SleekPrimary
+                    ),
+                    border = BorderStroke(1.dp, SleekBorder),
+                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
+                ) {
+                    Text(stringResource(com.example.R.string.step2_add_item), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+            Text(
+                stringResource(com.example.R.string.step2_drag_drop),
+                color = Color(0xFF49454F).copy(alpha = 0.7f),
+                fontSize = 10.sp,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
 fun WorkshopView(
     selectedModel: String,
     onModelChange: (String) -> Unit,
     prompt: String,
     onPromptChange: (String) -> Unit,
     imageUrl: String?,
+    imageUrls: List<String>,
     isUploadingImage: Boolean,
+    useSeedReferenceMode: Boolean,
+    referenceVideoUrls: List<String>,
+    referenceAudioUrls: List<String>,
     onUploadImage: () -> Unit,
+    onUploadReferenceVideo: () -> Unit,
+    onUploadReferenceAudio: () -> Unit,
     onRemoveImage: () -> Unit,
+    onRemoveImageAt: (Int) -> Unit,
+    onAddImageUrl: (String) -> Unit,
+    onAddReferenceVideoUrl: (String) -> Unit,
+    onRemoveReferenceVideoAt: (Int) -> Unit,
+    onAddReferenceAudioUrl: (String) -> Unit,
+    onRemoveReferenceAudioAt: (Int) -> Unit,
     onSubmit: () -> Unit,
     appModels: List<com.example.data.api.AppModel>,
     currentEnv: String,
@@ -986,110 +1144,168 @@ fun WorkshopView(
                         )
                     }
 
-                    DropdownMenu(
-                        expanded = dropdownExpanded,
-                        onDismissRequest = { dropdownExpanded = false },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(SleekSurface)
-                            .border(BorderStroke(1.dp, SleekBorder.copy(alpha = 0.5f)), RoundedCornerShape(12.dp))
-                            .padding(vertical = 4.dp)
-                    ) {
-                        if (appModels.isEmpty()) {
-                            DropdownMenuItem(
-                                text = {
+                    if (dropdownExpanded) {
+                        ModalBottomSheet(
+                            onDismissRequest = { dropdownExpanded = false },
+                            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+                            containerColor = SleekSurface,
+                            dragHandle = {
+                                BottomSheetDefaults.DragHandle(color = SleekBorder.copy(alpha = 0.5f))
+                            }
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp)
+                                    .padding(bottom = 24.dp)
+                            ) {
+                                // Title and Close Button
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(bottom = 16.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
                                     Text(
-                                        text = "无可用网络模型 (点击刷新)",
+                                        text = "选择视频生成模型",
                                         color = SleekText,
-                                        fontSize = 14.sp
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Bold
                                     )
-                                },
-                                onClick = {
-                                    onRefreshModels()
-                                    dropdownExpanded = false
+                                    IconButton(
+                                        onClick = { dropdownExpanded = false }
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Close,
+                                            contentDescription = "关闭",
+                                            tint = SleekText,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
                                 }
-                            )
-                        } else {
-                            appModels.forEach { appModel ->
-                                val active = appModel.model == selectedModel
-                                val isHot = appModel.isHot == 1
-                                val points = appModel.points ?: "1.00"
 
-                                DropdownMenuItem(
-                                    text = {
-                                        Column(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(vertical = 4.dp)
-                                        ) {
+                                if (appModels.isEmpty()) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 32.dp)
+                                            .clickable {
+                                                onRefreshModels()
+                                                dropdownExpanded = false
+                                            },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "无可用网络模型 (点击刷新)",
+                                            color = SleekText,
+                                            fontSize = 14.sp
+                                        )
+                                    }
+                                } else {
+                                    LazyColumn(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                                    ) {
+                                        items(appModels) { appModel ->
+                                            val active = appModel.model == selectedModel
+                                            val isHot = appModel.isHot == 1
+
                                             Row(
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.SpaceBetween,
-                                                modifier = Modifier.fillMaxWidth()
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .clip(RoundedCornerShape(12.dp))
+                                                    .background(if (active) SleekPrimary.copy(alpha = 0.12f) else SleekSurfaceVariant)
+                                                    .border(
+                                                        BorderStroke(
+                                                            width = 1.5.dp,
+                                                            color = if (active) SleekPrimary else SleekBorder.copy(alpha = 0.5f)
+                                                        ),
+                                                        shape = RoundedCornerShape(12.dp)
+                                                    )
+                                                    .clickable {
+                                                        onModelChange(appModel.model)
+                                                        dropdownExpanded = false
+                                                    }
+                                                    .padding(horizontal = 14.dp, vertical = 12.dp)
+                                                    .testTag("model_selector_${appModel.model}"),
+                                                verticalAlignment = Alignment.CenterVertically
                                             ) {
-                                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .size(36.dp)
+                                                        .clip(CircleShape)
+                                                        .background(if (active) SleekPrimary.copy(alpha = 0.2f) else SleekSecondary),
+                                                    contentAlignment = Alignment.Center
+                                                ) {
                                                     if (!appModel.image.isNullOrEmpty()) {
                                                         AsyncImage(
                                                             model = appModel.image,
                                                             contentDescription = null,
-                                                            modifier = Modifier
-                                                                .size(20.dp)
-                                                                .clip(CircleShape)
-                                                                .border(BorderStroke(0.5.dp, SleekBorder), CircleShape),
+                                                            modifier = Modifier.fillMaxSize(),
                                                             contentScale = ContentScale.Crop
                                                         )
-                                                        Spacer(modifier = Modifier.width(8.dp))
+                                                    } else {
+                                                        Icon(
+                                                            imageVector = Icons.Default.Layers,
+                                                            contentDescription = null,
+                                                            tint = if (active) SleekPrimary else SleekText.copy(alpha = 0.7f),
+                                                            modifier = Modifier.size(18.dp)
+                                                        )
                                                     }
-                                                    Text(
-                                                        text = appModel.name,
-                                                        color = if (active) SleekPrimary else SleekText,
-                                                        fontSize = 14.sp,
-                                                        fontWeight = if (active) FontWeight.Bold else FontWeight.Medium
-                                                    )
-                                                    if (isHot) {
-                                                        Spacer(modifier = Modifier.width(6.dp))
-                                                        Box(
-                                                            modifier = Modifier
-                                                                .clip(RoundedCornerShape(4.dp))
-                                                                .background(Color(0xFFFF4D4F))
-                                                                .padding(horizontal = 4.dp, vertical = 2.dp)
-                                                        ) {
-                                                            Text(
-                                                                text = "HOT",
-                                                                color = Color.White,
-                                                                fontSize = 8.sp,
-                                                                fontWeight = FontWeight.Bold
-                                                            )
+                                                }
+
+                                                Spacer(modifier = Modifier.width(12.dp))
+
+                                                Column(
+                                                    modifier = Modifier.weight(1f)
+                                                ) {
+                                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                                        Text(
+                                                            text = appModel.name,
+                                                            color = SleekText,
+                                                            fontSize = 14.sp,
+                                                            fontWeight = FontWeight.Bold
+                                                        )
+                                                        if (isHot) {
+                                                            Spacer(modifier = Modifier.width(6.dp))
+                                                            Box(
+                                                                modifier = Modifier
+                                                                    .clip(RoundedCornerShape(4.dp))
+                                                                    .background(Color(0xFFFF4D4F))
+                                                                    .padding(horizontal = 4.dp, vertical = 2.dp)
+                                                            ) {
+                                                                Text(
+                                                                    text = "HOT",
+                                                                    color = Color.White,
+                                                                    fontSize = 8.sp,
+                                                                    fontWeight = FontWeight.Bold
+                                                                )
+                                                            }
                                                         }
                                                     }
                                                 }
-                                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                                    Text(
-                                                        text = "${points}积分",
-                                                        color = SleekPrimary.copy(alpha = 0.7f),
-                                                        fontSize = 11.sp,
-                                                        modifier = Modifier.padding(end = 6.dp)
+
+                                                Spacer(modifier = Modifier.width(12.dp))
+
+                                                if (active) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.CheckCircle,
+                                                        contentDescription = "已选择",
+                                                        tint = SleekPrimary,
+                                                        modifier = Modifier.size(18.dp)
                                                     )
-                                                    if (active) {
-                                                        Icon(
-                                                            imageVector = Icons.Default.Check,
-                                                            contentDescription = "已选择",
-                                                            tint = SleekPrimary,
-                                                            modifier = Modifier.size(16.dp)
-                                                        )
-                                                    }
+                                                } else {
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .size(18.dp)
+                                                            .border(1.dp, SleekBorder, CircleShape)
+                                                    )
                                                 }
                                             }
                                         }
-                                    },
-                                    onClick = {
-                                        onModelChange(appModel.model)
-                                        dropdownExpanded = false
-                                    },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .testTag("model_selector_${appModel.model}")
-                                )
+                                    }
+                                }
                             }
                         }
                     }
@@ -1097,21 +1313,38 @@ fun WorkshopView(
             }
         }
 
-        // Section: Image upload area
+        // Section: Reference image upload (aligned with PC SeedReferenceImageUpload)
         item {
+            val maxImages = if (useSeedReferenceMode) 9 else 1
+            val isMulti = maxImages > 1
+
             Column {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = stringResource(com.example.R.string.step2_title),
-                        color = SleekText,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    if (imageUrl != null) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = stringResource(com.example.R.string.step2_title),
+                            color = SleekText,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = stringResource(com.example.R.string.step2_required),
+                            color = ErrorRed,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    if (isMulti) {
+                        Text(
+                            text = "${imageUrls.size}/$maxImages",
+                            color = SleekText.copy(alpha = 0.6f),
+                            fontSize = 11.sp
+                        )
+                    } else if (imageUrls.isNotEmpty()) {
                         Text(
                             text = stringResource(com.example.R.string.remove_image),
                             color = ErrorRed,
@@ -1122,68 +1355,303 @@ fun WorkshopView(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "${stringResource(com.example.R.string.step2_privacy_no_training)} ${stringResource(com.example.R.string.step2_privacy_auto_delete)}",
+                    color = Color(0xFF49454F).copy(alpha = 0.7f),
+                    fontSize = 11.sp,
+                    modifier = Modifier.padding(top = 2.dp, bottom = 8.dp)
+                )
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(130.dp)
-                        .clip(RoundedCornerShape(24.dp))
-                        .background(SleekSurfaceVariant)
-                        .border(BorderStroke(1.dp, SleekBorder), RoundedCornerShape(24.dp))
-                        .clickable(enabled = imageUrl == null && !isUploadingImage) { onUploadImage() }
-                        .testTag("image_upload_canvas")
-                ) {
-                    if (isUploadingImage) {
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            CircularProgressIndicator(color = SleekPrimary, strokeWidth = 2.dp)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(stringResource(com.example.R.string.upload_progress), color = Color(0xFF49454F), fontSize = 11.sp)
-                        }
-                    } else if (imageUrl != null) {
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            AsyncImage(
-                                model = imageUrl,
-                                contentDescription = "上传的参考首帧",
+                if (imageUrls.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(130.dp)
+                            .clip(RoundedCornerShape(24.dp))
+                            .background(SleekSurfaceVariant)
+                            .border(BorderStroke(1.dp, SleekBorder), RoundedCornerShape(24.dp))
+                            .clickable(enabled = !isUploadingImage) { onUploadImage() }
+                            .testTag("image_upload_canvas")
+                    ) {
+                        if (isUploadingImage) {
+                            Column(
                                 modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(Color.Black.copy(alpha = 0.2f))
-                            )
-                            Row(
-                                modifier = Modifier
-                                    .align(Alignment.BottomStart)
-                                    .padding(12.dp)
-                                    .clip(RoundedCornerShape(6.dp))
-                                    .background(Color.Black.copy(alpha = 0.6f))
-                                    .padding(horizontal = 8.dp, vertical = 4.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
                             ) {
-                                Icon(Icons.Default.CloudDone, contentDescription = null, tint = SuccessGreen, modifier = Modifier.size(12.dp))
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(stringResource(com.example.R.string.upload_ready), color = Color.White, fontSize = 10.sp)
+                                CircularProgressIndicator(color = SleekPrimary, strokeWidth = 2.dp)
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    stringResource(com.example.R.string.upload_progress),
+                                    color = Color(0xFF49454F),
+                                    fontSize = 11.sp
+                                )
+                            }
+                        } else {
+                            Column(
+                                modifier = Modifier.fillMaxSize(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Icon(Icons.Default.CloudUpload, contentDescription = null, tint = SleekPrimary, modifier = Modifier.size(32.dp))
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    stringResource(com.example.R.string.step2_drag_drop),
+                                    color = SleekText,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    stringResource(com.example.R.string.step2_limits, maxImages),
+                                    color = Color(0xFF49454F).copy(alpha = 0.7f),
+                                    fontSize = 10.sp,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.padding(horizontal = 16.dp)
+                                )
                             }
                         }
-                    } else {
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
+                    }
+                } else {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(24.dp))
+                            .background(SleekSurfaceVariant)
+                            .border(BorderStroke(1.dp, SleekBorder), RoundedCornerShape(24.dp))
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            Icon(Icons.Default.AddPhotoAlternate, contentDescription = null, tint = SleekPrimary, modifier = Modifier.size(32.dp))
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(stringResource(com.example.R.string.upload_placeholder_title), color = SleekText, fontSize = 11.sp, fontWeight = FontWeight.Medium)
-                            Text(stringResource(com.example.R.string.upload_placeholder_desc), color = Color(0xFF49454F).copy(alpha = 0.7f), fontSize = 10.sp)
+                            itemsIndexed(imageUrls) { index, url ->
+                                Column(
+                                    horizontalAlignment = Alignment.Start,
+                                    modifier = Modifier.width(100.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(100.dp)
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .border(BorderStroke(1.dp, SleekBorder), RoundedCornerShape(12.dp))
+                                    ) {
+                                        AsyncImage(
+                                            model = url,
+                                            contentDescription = "Uploaded reference image",
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentScale = ContentScale.Crop
+                                        )
+                                        IconButton(
+                                            onClick = { onRemoveImageAt(index) },
+                                            modifier = Modifier
+                                                .align(Alignment.TopEnd)
+                                                .padding(4.dp)
+                                                .size(20.dp)
+                                                .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Close,
+                                                contentDescription = "Remove",
+                                                tint = Color.White,
+                                                modifier = Modifier.size(12.dp)
+                                            )
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = "reference-image-${index + 1}.png",
+                                        color = SleekText.copy(alpha = 0.7f),
+                                        fontSize = 11.sp,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+
+                            if (isMulti && imageUrls.size < maxImages) {
+                                item {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(100.dp)
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .background(Color.Transparent)
+                                            .border(BorderStroke(1.dp, SleekBorder.copy(alpha = 0.5f)), RoundedCornerShape(12.dp))
+                                            .clickable(enabled = !isUploadingImage) { onUploadImage() },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        if (isUploadingImage) {
+                                            CircularProgressIndicator(color = SleekPrimary, strokeWidth = 2.dp)
+                                        } else {
+                                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                                Icon(Icons.Default.CloudUpload, contentDescription = null, tint = SleekPrimary.copy(alpha = 0.7f), modifier = Modifier.size(20.dp))
+                                                Spacer(modifier = Modifier.height(4.dp))
+                                                Text(
+                                                    stringResource(com.example.R.string.step2_add_more),
+                                                    color = SleekText.copy(alpha = 0.7f),
+                                                    fontSize = 11.sp
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Color(0xFFFFF7E8))
+                                .border(BorderStroke(1.dp, Color(0xFFFFD591)), RoundedCornerShape(12.dp))
+                                .padding(horizontal = 12.dp, vertical = 10.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = null,
+                                    tint = Color(0xFFD48806),
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "✓ ${stringResource(com.example.R.string.step2_uploaded_success, imageUrls.size)}",
+                                    color = Color(0xFFD48806),
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(4.dp))
+                            val clipboardManager = androidx.compose.ui.platform.LocalClipboardManager.current
+                            imageUrls.forEach { url ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 2.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = url,
+                                        color = SleekText.copy(alpha = 0.6f),
+                                        fontSize = 11.sp,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = stringResource(com.example.R.string.step2_copy_url),
+                                        color = Color(0xFFD48806),
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.clickable {
+                                            clipboardManager.setText(androidx.compose.ui.text.AnnotatedString(url))
+                                        }
+                                    )
+                                }
+                            }
                         }
                     }
                 }
+
+                if (imageUrls.size < maxImages) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    var inputUrlText by remember { mutableStateOf("") }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Link,
+                            contentDescription = "Link",
+                            tint = SleekText.copy(alpha = 0.5f),
+                            modifier = Modifier.size(20.dp)
+                        )
+
+                        OutlinedTextField(
+                            value = inputUrlText,
+                            onValueChange = { inputUrlText = it },
+                            placeholder = {
+                                Text(
+                                    stringResource(com.example.R.string.step2_image_url_placeholder),
+                                    color = Color(0xFF49454F).copy(alpha = 0.4f),
+                                    fontSize = 12.sp
+                                )
+                            },
+                            modifier = Modifier.weight(1f),
+                            singleLine = true,
+                            shape = RoundedCornerShape(8.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = SleekSurface,
+                                unfocusedContainerColor = SleekSurface,
+                                focusedBorderColor = SleekPrimary,
+                                unfocusedBorderColor = SleekBorder,
+                                focusedLabelColor = SleekPrimary
+                            ),
+                            textStyle = TextStyle(color = SleekText, fontSize = 12.sp)
+                        )
+
+                        Button(
+                            onClick = {
+                                if (inputUrlText.trim().isNotEmpty()) {
+                                    onAddImageUrl(inputUrlText)
+                                    inputUrlText = ""
+                                }
+                            },
+                            shape = RoundedCornerShape(8.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = SleekSurfaceVariant,
+                                contentColor = SleekPrimary
+                            ),
+                            border = BorderStroke(1.dp, SleekBorder),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                            modifier = Modifier.height(44.dp)
+                        ) {
+                            Text(stringResource(com.example.R.string.step2_add_item), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+
+                if (isMulti) {
+                    Text(
+                        text = stringResource(com.example.R.string.step2_hint_seed),
+                        color = Color(0xFF49454F).copy(alpha = 0.7f),
+                        fontSize = 10.sp,
+                        modifier = Modifier.padding(top = 6.dp)
+                    )
+                }
+            }
+        }
+
+        // Section: Seed reference video/audio (when useSeedStasksReferenceMode)
+        if (useSeedReferenceMode) {
+            item {
+                SeedReferenceMediaSection(
+                    title = stringResource(com.example.R.string.step2_reference_videos),
+                    hint = stringResource(com.example.R.string.step2_reference_videos_hint),
+                    urls = referenceVideoUrls,
+                    urlPlaceholder = stringResource(com.example.R.string.step2_video_url_placeholder),
+                    maxCount = 3,
+                    onUpload = onUploadReferenceVideo,
+                    onAddUrl = onAddReferenceVideoUrl,
+                    onRemoveAt = onRemoveReferenceVideoAt
+                )
+            }
+            item {
+                SeedReferenceMediaSection(
+                    title = stringResource(com.example.R.string.step2_reference_audios),
+                    hint = stringResource(com.example.R.string.step2_reference_audios_hint),
+                    urls = referenceAudioUrls,
+                    urlPlaceholder = stringResource(com.example.R.string.step2_audio_url_placeholder),
+                    maxCount = 3,
+                    onUpload = onUploadReferenceAudio,
+                    onAddUrl = onAddReferenceAudioUrl,
+                    onRemoveAt = onRemoveReferenceAudioAt
+                )
             }
         }
 

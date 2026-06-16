@@ -1,6 +1,7 @@
 package com.example.ui.viewmodel
 
 import android.app.Application
+import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -13,9 +14,14 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 import kotlin.random.Random
+
+/** 与 PC seedReferenceConstants 一致 */
+private const val SEED_MAX_REFERENCE_IMAGES = 9
+private const val SEED_MAX_REFERENCE_MEDIA = 3
 
 class VideoViewModel(
     application: Application,
@@ -51,11 +57,24 @@ class VideoViewModel(
     private val _prompt = MutableStateFlow("")
     val prompt: StateFlow<String> = _prompt.asStateFlow()
 
-    private val _imageUrl = MutableStateFlow<String?>(null)
-    val imageUrl: StateFlow<String?> = _imageUrl.asStateFlow()
+    private val _imageUrls = MutableStateFlow<List<String>>(emptyList())
+    val imageUrls: StateFlow<List<String>> = _imageUrls.asStateFlow()
+
+    val imageUrl: StateFlow<String?> = _imageUrls.map { it.firstOrNull() }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = null
+        )
 
     private val _isUploadingImage = MutableStateFlow(false)
     val isUploadingImage: StateFlow<Boolean> = _isUploadingImage.asStateFlow()
+
+    private val _referenceVideoUrls = MutableStateFlow<List<String>>(emptyList())
+    val referenceVideoUrls: StateFlow<List<String>> = _referenceVideoUrls.asStateFlow()
+
+    private val _referenceAudioUrls = MutableStateFlow<List<String>>(emptyList())
+    val referenceAudioUrls: StateFlow<List<String>> = _referenceAudioUrls.asStateFlow()
 
     // Task Draw (lottery mechanics)
     private val _isDrawing = MutableStateFlow(false)
@@ -91,7 +110,7 @@ class VideoViewModel(
         viewModelScope.launch {
             _isLoadingModels.value = true
             try {
-                val baseUrl = if (_currentEnv.value == "Online") "https://api-a.frai.live" else "https://api.tacpay.cn"
+                val baseUrl = repository.resolveBaseUrl(_currentEnv.value == "Online")
                 val list = repository.fetchAppModels(baseUrl)
                 if (list != null) {
                     _appModels.value = list
@@ -176,29 +195,148 @@ class VideoViewModel(
 
     fun selectModel(model: String) {
         _selectedModel.value = model
+        val maxImages = maxReferenceImages(model)
+        if (_imageUrls.value.size > maxImages) {
+            _imageUrls.value = _imageUrls.value.take(maxImages)
+        }
+        if (!isFullFeaturedSeedanceModel(model)) {
+            _referenceVideoUrls.value = emptyList()
+            _referenceAudioUrls.value = emptyList()
+        }
     }
+
+    fun isFullFeaturedSeedanceModel(model: String = _selectedModel.value): Boolean {
+        return model == "doubao-seedance-2-0-fast-260128" || model == "doubao-seedance-2-0-260128"
+    }
+
+    fun maxReferenceImages(model: String = _selectedModel.value): Int {
+        return if (isFullFeaturedSeedanceModel(model)) SEED_MAX_REFERENCE_IMAGES else 1
+    }
+
+    private fun baseUrl(): String = repository.resolveBaseUrl(_currentEnv.value == "Online")
 
     fun updatePrompt(text: String) {
         _prompt.value = text
     }
 
-    fun simulateImageUpload() {
+    /** 与 PC SeedReferenceImageUpload.uploadAt → uploadSceneImageFile 一致 */
+    fun uploadImageFromUri(uri: Uri) {
         viewModelScope.launch {
+            val maxImages = maxReferenceImages()
+            if (_imageUrls.value.size >= maxImages) {
+                showToast("已达到最大图片上传限制！")
+                return@launch
+            }
             _isUploadingImage.value = true
-            delay(1200) // Simulates image upload upload processing
-            val sampleImageUrls = listOf(
-                "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=300",
-                "https://images.unsplash.com/photo-1541701494587-cb58502866ab?q=80&w=300",
-                "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=300"
-            )
-            _imageUrl.value = sampleImageUrls.random()
-            _isUploadingImage.value = false
-            showToast("图片上传成功！")
+            try {
+                val url = repository.uploadSceneImage(getApplication(), baseUrl(), uri, "480")
+                if (url != null) {
+                    _imageUrls.value = _imageUrls.value + url
+                    showToast("图片上传成功！")
+                } else {
+                    showToast("图片上传失败，请重试。")
+                }
+            } catch (e: Exception) {
+                showToast("图片上传失败，请重试。")
+                e.printStackTrace()
+            } finally {
+                _isUploadingImage.value = false
+            }
         }
     }
 
     fun removeUploadedImage() {
-        _imageUrl.value = null
+        _imageUrls.value = emptyList()
+    }
+
+    fun removeImageAt(index: Int) {
+        val currentList = _imageUrls.value.toMutableList()
+        if (index in currentList.indices) {
+            currentList.removeAt(index)
+            _imageUrls.value = currentList
+        }
+    }
+
+    fun addImageUrl(url: String) {
+        val trimmed = url.trim()
+        if (trimmed.isEmpty()) return
+        val maxImages = maxReferenceImages()
+        if (_imageUrls.value.size >= maxImages) {
+            showToast("已达到最大图片上传限制！")
+            return
+        }
+        _imageUrls.value = _imageUrls.value + trimmed
+        showToast("图片添加成功！")
+    }
+
+    fun addReferenceVideoUrl(url: String) {
+        val trimmed = url.trim()
+        if (trimmed.isEmpty()) return
+        if (_referenceVideoUrls.value.size >= SEED_MAX_REFERENCE_MEDIA) {
+            showToast("已达到最大参考视频数量！")
+            return
+        }
+        _referenceVideoUrls.value = _referenceVideoUrls.value + trimmed
+    }
+
+    fun removeReferenceVideoAt(index: Int) {
+        _referenceVideoUrls.value = _referenceVideoUrls.value.filterIndexed { i, _ -> i != index }
+    }
+
+    fun addReferenceAudioUrl(url: String) {
+        val trimmed = url.trim()
+        if (trimmed.isEmpty()) return
+        if (_referenceAudioUrls.value.size >= SEED_MAX_REFERENCE_MEDIA) {
+            showToast("已达到最大参考音频数量！")
+            return
+        }
+        _referenceAudioUrls.value = _referenceAudioUrls.value + trimmed
+    }
+
+    fun removeReferenceAudioAt(index: Int) {
+        _referenceAudioUrls.value = _referenceAudioUrls.value.filterIndexed { i, _ -> i != index }
+    }
+
+    fun uploadReferenceVideoFromUri(uri: Uri) {
+        viewModelScope.launch {
+            if (_referenceVideoUrls.value.size >= SEED_MAX_REFERENCE_MEDIA) {
+                showToast("已达到最大参考视频数量！")
+                return@launch
+            }
+            try {
+                val url = repository.uploadReferenceMedia(getApplication(), baseUrl(), uri, 1)
+                if (url != null) {
+                    _referenceVideoUrls.value = _referenceVideoUrls.value + url
+                    showToast("视频上传成功！")
+                } else {
+                    showToast("视频上传失败，请重试。")
+                }
+            } catch (e: Exception) {
+                showToast("视频上传失败，请重试。")
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun uploadReferenceAudioFromUri(uri: Uri) {
+        viewModelScope.launch {
+            if (_referenceAudioUrls.value.size >= SEED_MAX_REFERENCE_MEDIA) {
+                showToast("已达到最大参考音频数量！")
+                return@launch
+            }
+            try {
+                val url = repository.uploadReferenceMedia(getApplication(), baseUrl(), uri, 1)
+                if (url != null) {
+                    _referenceAudioUrls.value = _referenceAudioUrls.value + url
+                    showToast("音频上传成功！")
+                } else {
+                    showToast("音频上传失败，请重试。")
+                }
+            } catch (e: Exception) {
+                showToast("音频上传失败，请重试。")
+                e.printStackTrace()
+            }
+        }
     }
 
     fun startVideoGeneration() {
@@ -230,7 +368,7 @@ class VideoViewModel(
             val newTask = VideoTask(
                 modelType = _selectedModel.value,
                 prompt = currentPrompt,
-                sourceImageUri = _imageUrl.value,
+                sourceImageUri = if (_imageUrls.value.isEmpty()) null else _imageUrls.value.joinToString(","),
                 status = "idle",
                 progress = 0
             )
@@ -240,7 +378,9 @@ class VideoViewModel(
 
             // Reset input values
             _prompt.value = ""
-            _imageUrl.value = null
+            _imageUrls.value = emptyList()
+            _referenceVideoUrls.value = emptyList()
+            _referenceAudioUrls.value = emptyList()
             showToast("任务已提交至队列，后台生成中...")
         }
     }
@@ -368,7 +508,7 @@ class VideoViewModel(
         viewModelScope.launch {
             repository.logoutUser()
             showToast("账号及云端生成历史已彻底删除清除。")
-            _imageUrl.value = null
+            _imageUrls.value = emptyList()
             _prompt.value = ""
         }
     }

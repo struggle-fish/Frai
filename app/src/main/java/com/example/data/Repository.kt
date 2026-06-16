@@ -1,5 +1,8 @@
 package com.example.data
 
+import android.content.Context
+import android.net.Uri
+import com.example.data.api.ApiConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -7,10 +10,17 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlin.random.Random
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.File
+import java.io.FileOutputStream
 
 class VideoRepository(
     private val videoTaskDao: VideoTaskDao,
-    private val userProfileDao: UserProfileDao
+    private val userProfileDao: UserProfileDao,
+    private val apiConfig: ApiConfig = ApiConfig()
 ) {
     val allTasks: Flow<List<VideoTask>> = videoTaskDao.getAllTasks()
     val userProfile: Flow<UserProfile?> = userProfileDao.getProfile()
@@ -122,6 +132,8 @@ class VideoRepository(
         videoTaskDao.clearAllTasks()
     }
 
+    fun resolveBaseUrl(isOnline: Boolean): String = apiConfig.baseUrl(isOnline)
+
     suspend fun fetchAppModels(baseUrl: String): List<com.example.data.api.AppModel>? {
         return try {
             val service = com.example.data.api.ApiService.create(baseUrl)
@@ -151,6 +163,73 @@ class VideoRepository(
             e.printStackTrace()
             null
         }
+    }
+
+    /** 与 PC uploadSceneImageFile 一致：VITE_NEW_VIDEO=1 时走 Fileuploads，否则走 ImageUpload/upload */
+    suspend fun uploadSceneImage(
+        context: Context,
+        baseUrl: String,
+        uri: Uri,
+        resolution: String = "480"
+    ): String? {
+        return try {
+            val service = com.example.data.api.ApiService.create(baseUrl, forUpload = true)
+            val part = uriToMultipartPart(context, uri, "file")
+            val response = if (apiConfig.useNewVideoUpload) {
+                val typeBody = "1".toRequestBody("text/plain".toMediaTypeOrNull())
+                service.fileUploads(part, typeBody)
+            } else {
+                val resValue = if (resolution.endsWith("p")) resolution else "${resolution}p"
+                val resBody = resValue.toRequestBody("text/plain".toMediaTypeOrNull())
+                service.uploadSceneImage(part, resBody)
+            }
+            if (response.code == 200) {
+                response.data?.fileUrl?.trim()?.takeIf { it.isNotEmpty() }
+                    ?: response.data?.url?.trim()?.takeIf { it.isNotEmpty() }
+            } else {
+                android.util.Log.e("VideoRepository", "uploadSceneImage failed: code=${response.code}, msg=${response.msg}")
+                null
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    /** 与 PC fileuploads2 一致：上传参考视频/音频 */
+    suspend fun uploadReferenceMedia(
+        context: Context,
+        baseUrl: String,
+        uri: Uri,
+        uploadType: Int = 1
+    ): String? {
+        return try {
+            val service = com.example.data.api.ApiService.create(baseUrl, forUpload = true)
+            val part = uriToMultipartPart(context, uri, "file")
+            val typeBody = uploadType.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+            val response = service.fileUploads(part, typeBody)
+            if (response.code == 200) {
+                response.data?.fileUrl?.trim()?.takeIf { it.isNotEmpty() }
+            } else {
+                android.util.Log.e("VideoRepository", "uploadReferenceMedia failed: code=${response.code}, msg=${response.msg}")
+                null
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    private fun uriToMultipartPart(context: Context, uri: Uri, partName: String): MultipartBody.Part {
+        val contentResolver = context.contentResolver
+        val mimeType = contentResolver.getType(uri) ?: "application/octet-stream"
+        val extension = mimeType.substringAfter('/', "bin")
+        val tempFile = File.createTempFile("upload_", ".$extension", context.cacheDir)
+        contentResolver.openInputStream(uri)?.use { input ->
+            FileOutputStream(tempFile).use { output -> input.copyTo(output) }
+        } ?: throw IllegalStateException("Cannot open uri: $uri")
+        val requestBody = tempFile.asRequestBody(mimeType.toMediaTypeOrNull())
+        return MultipartBody.Part.createFormData(partName, tempFile.name, requestBody)
     }
 
     // Trigger asynchronous multi-stage video generation simulation

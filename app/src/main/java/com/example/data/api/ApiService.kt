@@ -4,11 +4,16 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
+import okhttp3.RequestBody
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.GET
+import retrofit2.http.Multipart
+import retrofit2.http.POST
+import retrofit2.http.Part
 import java.util.concurrent.TimeUnit
 
 @JsonClass(generateAdapter = true)
@@ -48,6 +53,19 @@ data class CategoryResponse(
     @Json(name = "data") val data: List<AppModel>?
 )
 
+@JsonClass(generateAdapter = true)
+data class UploadResponse(
+    @Json(name = "code") val code: Int,
+    @Json(name = "msg") val msg: String?,
+    @Json(name = "data") val data: UploadData?
+)
+
+@JsonClass(generateAdapter = true)
+data class UploadData(
+    @Json(name = "file_url") val fileUrl: String?,
+    @Json(name = "url") val url: String?
+)
+
 interface ApiService {
 
     @GET("api/index/getAppModelList")
@@ -62,16 +80,37 @@ interface ApiService {
         @retrofit2.http.Query("type") type: String? = null
     ): ModelResponse
 
+    /** 与 PC uploadSceneImageFile 一致：上传参考图并返回 file_url */
+    @Multipart
+    @POST("api/ImageUpload/upload")
+    suspend fun uploadSceneImage(
+        @Part file: MultipartBody.Part,
+        @Part("res") resolution: RequestBody
+    ): UploadResponse
+
+    /** 与 PC fileuploads2 一致：上传参考视频/音频 */
+    @Multipart
+    @POST("api/Fileuploads/upload")
+    suspend fun fileUploads(
+        @Part file: MultipartBody.Part,
+        @Part("upload_type") uploadType: RequestBody
+    ): UploadResponse
+
     companion object {
-        fun create(baseUrl: String): ApiService {
+        private const val DEFAULT_TIMEOUT_SEC = 15L
+        private const val UPLOAD_TIMEOUT_SEC = 120L
+
+        fun create(baseUrl: String, forUpload: Boolean = false): ApiService {
+            val timeout = if (forUpload) UPLOAD_TIMEOUT_SEC else DEFAULT_TIMEOUT_SEC
             val loggingInterceptor = HttpLoggingInterceptor().apply {
                 level = HttpLoggingInterceptor.Level.BODY
             }
 
             val okHttpClient = OkHttpClient.Builder()
                 .addInterceptor(loggingInterceptor)
-                .connectTimeout(15, TimeUnit.SECONDS)
-                .readTimeout(15, TimeUnit.SECONDS)
+                .connectTimeout(timeout, TimeUnit.SECONDS)
+                .readTimeout(timeout, TimeUnit.SECONDS)
+                .writeTimeout(timeout, TimeUnit.SECONDS)
                 .build()
 
             val moshi = Moshi.Builder()
